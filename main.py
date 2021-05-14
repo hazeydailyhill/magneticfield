@@ -7,11 +7,25 @@ import matplotlib.pyplot as plt
 
 
 
+def vector_correct(position, input_vector):
+    corrected_vector = []
+    for i in position:
+        corrected_vector.append(i)
+    for j in input_vector:
+        corrected_vector.append(j)
+    return corrected_vector
 
-def Harmonic_Oscillator(position, velocity, k, a):
-    return -position*k -velocity*a
+def Bfield(position,line_direction, line_position):
+    current = 1
+    return current*np.cross(line_direction,(position/np.linalg.norm(position)))/np.linalg.norm(position-line_position)**2
+    
 
-
+#line direction must be a unit vector
+def descrete_integral(steps,start,end,function,position,line_direction):
+    out = 0
+    for i in range(1,steps+1):
+        out += function(position, line_direction, start+line_direction*(end-start)/steps)
+    return out
 
 class Particle:
     def __init__(self, mass, charge, position, velocity):
@@ -30,33 +44,46 @@ class Particle:
 
 
 
-p1 = Particle(1, 1, np.array([1.,1.,1.]), np.array([-1.,1.,0.]))
+p1 = Particle(1, 1, np.array([1.,0.,0.]), np.array([0.,0.,0.]))
 
 time = 0 
 timestep = .1
-xpos = []
-ypos = []
-zpos = []
 
+bound_range = 10
 
+output_vectors = []
+for i in range(bound_range):
+    for k in range(bound_range):
+        output_vectors.append(vector_correct([float(i-bound_range/2),0,float(k-bound_range/2)], descrete_integral(10, 0., 1., Bfield, [float(i-bound_range/2),0,float(k-bound_range/2)], np.array([0.,1.,0.]))))
 
-while time < 100:
-    p1.update(Harmonic_Oscillator(p1.position, p1.velocity, 1, .25), timestep)
-
-    xpos.append(p1.position[0])
-    ypos.append(p1.position[1])
-    zpos.append(p1.position[2])
-    time += timestep
 
 fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(xpos, ypos, zpos,c=xpos, cmap='Greens')
+
+# draw vector
+soa = np.array(output_vectors)
+
+X, Y, Z, U, V, W = zip(*soa)
+ax = fig.gca(projection='3d')
+
+yline = np.linspace(-1, 1, 100)
+xline = yline*0
+zline = 0
+
+ax.plot3D(xline, yline, zline, 'gray')
+
+ax.quiver(X, Y, Z, U, V, W, length=1, normalize=True)
+ax.set_xlim([-50, 50])
+ax.set_ylim([-50, 50])
+ax.set_zlim([-50, 50])
+ax.set_title("Vectors")
+
+
 plt.show()
 
+#fig = plt.figure()
+#ax = plt.axes(projection='3d')
+#ax.scatter3D(xpos, ypos, zpos,c=xpos, cmap='Greens')
+#plt.show()
 
 
-
-
-#result = integrate.quad(lambda x: x**2, 0, 1)
-#print(result[0], "with",result[1],"error")
 
