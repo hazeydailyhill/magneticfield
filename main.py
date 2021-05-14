@@ -5,7 +5,8 @@ import numpy as np
 from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 
-
+def path_func(x,y,z):
+    return np.array([m.cos(5*z),m.sin(5*z),z])
 
 def vector_correct(position, input_vector):
     corrected_vector = []
@@ -17,7 +18,7 @@ def vector_correct(position, input_vector):
 
 def Bfield(position,line_direction, line_position):
     current = 1
-    return current*np.cross(line_direction,(position/np.linalg.norm(position)))/np.linalg.norm(position-line_position)**2
+    return current*np.cross(line_direction/np.linalg.norm(line_direction),(position/np.linalg.norm(position)))/np.linalg.norm(position-line_position)**2
     
 
 #line direction must be a unit vector
@@ -49,12 +50,13 @@ p1 = Particle(1, 1, np.array([1.,0.,0.]), np.array([0.,0.,0.]))
 time = 0 
 timestep = .1
 
-bound_range = 10
+bound_range = 20
 
 output_vectors = []
 for i in range(bound_range):
+    #for j in range(3):
     for k in range(bound_range):
-        output_vectors.append(vector_correct([float(i-bound_range/2),0,float(k-bound_range/2)], descrete_integral(10, 0., 1., Bfield, [float(i-bound_range/2),0,float(k-bound_range/2)], np.array([0.,1.,0.]))))
+        output_vectors.append(vector_correct([float(i-bound_range/2),0,float(k-bound_range/2)], descrete_integral(100, 0., 6*m.pi, Bfield, [float(i-bound_range/2),0,float(k-bound_range/2)], path_func(0,0,i+.001)-path_func(0,0,i)))) #testing the line x^2
 
 
 fig = plt.figure()
@@ -65,9 +67,10 @@ soa = np.array(output_vectors)
 X, Y, Z, U, V, W = zip(*soa)
 ax = fig.gca(projection='3d')
 
-yline = np.linspace(-1, 1, 100)
-xline = yline*0
-zline = 0
+zline = np.linspace(0, 6*m.pi, 500)
+yline = np.sin(5*zline)
+xline = np.cos(5*zline)
+
 
 ax.plot3D(xline, yline, zline, 'gray')
 
