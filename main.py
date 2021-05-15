@@ -6,7 +6,7 @@ from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 
 def path_func(x,y,z):
-    return np.array([m.cos(5*z),m.sin(5*z),z])
+    return np.array([m.cos(15*z),m.sin(15*z),z])
 
 def vector_correct(position, input_vector):
     corrected_vector = []
@@ -16,16 +16,16 @@ def vector_correct(position, input_vector):
         corrected_vector.append(j)
     return corrected_vector
 
-def Bfield(position,line_direction, line_position):
+def Bfield(position, line_direction, line_position):
     current = 1
-    return current*np.cross(line_direction/np.linalg.norm(line_direction),(position/np.linalg.norm(position)))/np.linalg.norm(position-line_position)**2
+    return current*np.cross(line_direction/np.linalg.norm(line_direction),((position-line_position)/np.linalg.norm(position-line_position)))/np.linalg.norm(position-line_position)**2
     
 
 #line direction must be a unit vector
-def descrete_integral(steps,start,end,function,position,line_direction):
+def descrete_integral(steps,start,end,function,position,curve):
     out = 0
     for i in range(1,steps+1):
-        out += function(position, line_direction, start+line_direction*(end-start)/steps)
+        out += function(position, curve(0,0,start+(end-start)/steps*i+.01)-curve(0,0,start+(end-start)/steps*i), curve(0,0,start+(end-start)/steps*i)) #wrong
     return out
 
 class Particle:
@@ -47,16 +47,16 @@ class Particle:
 
 p1 = Particle(1, 1, np.array([1.,0.,0.]), np.array([0.,0.,0.]))
 
-time = 0 
-timestep = .1
 
-bound_range = 20
+
+bound_range = 6
 
 output_vectors = []
-for i in range(bound_range):
-    #for j in range(3):
-    for k in range(bound_range):
-        output_vectors.append(vector_correct([float(i-bound_range/2),0,float(k-bound_range/2)], descrete_integral(100, 0., 6*m.pi, Bfield, [float(i-bound_range/2),0,float(k-bound_range/2)], path_func(0,0,i+.001)-path_func(0,0,i)))) #testing the line x^2
+for i in range(1,bound_range):
+    for j in range(bound_range-3):
+        for k in range(bound_range+4):
+            start_point = [i-3,j,k-3]
+            output_vectors.append(vector_correct(start_point, descrete_integral(100, 0., 2*m.pi, Bfield, start_point, path_func)))
 
 
 fig = plt.figure()
@@ -67,18 +67,18 @@ soa = np.array(output_vectors)
 X, Y, Z, U, V, W = zip(*soa)
 ax = fig.gca(projection='3d')
 
-zline = np.linspace(0, 6*m.pi, 500)
-yline = np.sin(5*zline)
-xline = np.cos(5*zline)
+zline = np.linspace(0, 2*m.pi, 500)
+yline = np.sin(15*zline)
+xline = np.cos(15*zline)
 
 
 ax.plot3D(xline, yline, zline, 'gray')
 
-ax.quiver(X, Y, Z, U, V, W, length=1, normalize=True)
+ax.quiver(X, Y, Z, U, V, W, length=.75, normalize=True)
 ax.set_xlim([-50, 50])
 ax.set_ylim([-50, 50])
 ax.set_zlim([-50, 50])
-ax.set_title("Vectors")
+ax.set_title("Magnetic field of a loop")
 
 
 plt.show()
