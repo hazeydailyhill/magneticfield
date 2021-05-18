@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib as mpl 
 from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
+from matplotlib import cm
+
 
 def path_func(x,y,z):
     return np.array([m.cos(z),m.sin(z),0*z])
@@ -43,14 +45,17 @@ class Particle:
         self.position += self.velocity*timestep+.5*accel*timestep**2 
 
 bound_range = 6
-
+vector_list = []
 output_vectors = []
 for i in range(1,bound_range):
     for j in range(1,bound_range):
         for k in range(1,bound_range):
             start_point = [i-3,j-3,k-3]
-            output_vectors.append(vector_correct(start_point, descrete_integral(100, 0., 2*m.pi, Bfield, start_point, path_func)))
+            magnetic_field_vector = descrete_integral(100, 0., 2*m.pi, Bfield, start_point, path_func)
+            vector_list.append(magnetic_field_vector)
+            output_vectors.append(vector_correct(start_point, magnetic_field_vector))
 
+vector_list = np.array(vector_list)
 fig = plt.figure()
 # draw vector
 soa = np.array(output_vectors)
@@ -64,10 +69,11 @@ xline = np.cos(zline)
 ax.plot3D(xline, yline, 0*zline, 'gray')
 
 #vector setup
-M = []
-for i in range(len(U)):
-    M.append(m.sqrt(U[i]**2+V[i]**2+W[i]**2))
-qq = ax.quiver(X, Y, Z, U, V, W, M, cmap= 'autumn', length=.75, normalize=True) #I think the color based magnitude will go here
+
+#M = np.linalg.norm(U)
+#print(M)
+
+qq = ax.quiver(X, Y, Z, U, V, W, cmap= 'autumn', length=.5, normalize=True) #I think the color based magnitude will go here
 plt.colorbar(qq, cmap='autumn')
 ax.set_xlim([-50, 50])
 ax.set_ylim([-50, 50])
