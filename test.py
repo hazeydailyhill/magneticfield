@@ -1,15 +1,33 @@
-import matplotlib as mpl 
+from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
-from numpy import arange,meshgrid,sqrt
+import numpy as np
 
-u,v = arange(-50,51,10),arange(-50,51,10)
-print(u)
-u,v = meshgrid(u,v)
-print(u)
+# Make the grid
+x, y, z = np.meshgrid(np.arange(-0.8, 1, 0.2),
+                      np.arange(-0.8, 1, 0.2),
+                      np.arange(-0.8, 1, 0.8))
 
-M = sqrt(u*u+v*v) # magnitude
-x,y = u,v
-print(M)
-qq=plt.quiver(x,y,u,v,M,cmap=plt.cm.jet)
-plt.colorbar(qq, cmap=plt.cm.jet)
+# Make the direction data for the arrows
+u = np.sin(np.pi * x) * np.cos(np.pi * y) * np.cos(np.pi * z)
+v = -np.cos(np.pi * x) * np.sin(np.pi * y) * np.cos(np.pi * z)
+w = (np.sqrt(2.0 / 3.0) * np.cos(np.pi * x) * np.cos(np.pi * y) *
+     np.sin(np.pi * z))
+
+# Color by azimuthal angle
+c = np.arctan2(v, u)
+# Flatten and normalize
+c = (c.ravel() - c.min()) / c.ptp()
+# Repeat for each body line and two head lines
+c = np.concatenate((c, np.repeat(c, 2)))
+# Colormap
+
+
+c = plt.cm.hsv(c)
+
+M = plt.cm.hsv(np.sqrt(u*u+v*v))
+print(np.sqrt(u*u+v*v))
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.quiver(x, y, z, u, v, w, colors=M, length=0.1, normalize=True)
 plt.show()

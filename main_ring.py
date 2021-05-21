@@ -52,15 +52,23 @@ for i in range(1,bound_range):
         for k in range(1,bound_range):
             start_point = [i-3,j-3,k-3]
             magnetic_field_vector = descrete_integral(100, 0., 2*m.pi, Bfield, start_point, path_func)
-            vector_list.append(magnetic_field_vector)
+            vector_list.append(list(magnetic_field_vector))
             output_vectors.append(vector_correct(start_point, magnetic_field_vector))
 
-vector_list = np.array(vector_list)
 fig = plt.figure()
 # draw vector
 soa = np.array(output_vectors)
 X, Y, Z, U, V, W = zip(*soa)
 ax = fig.gca(projection='3d')
+
+
+# Color by azimuthal angle
+
+c = #need to make this line write the vector magnitude into some stupid fucking impossible to understand/ communicate form, seriously am I the first person to ever want this????
+print(c)
+c = (c.ravel() - c.min()) / c.ptp()
+c = np.concatenate((c, np.repeat(c, 2)))
+c = plt.cm.hsv(c)
 
 #curve
 zline = np.linspace(0, 2*m.pi, 500)
@@ -70,11 +78,8 @@ ax.plot3D(xline, yline, 0*zline, 'gray')
 
 #vector setup
 
-#M = np.linalg.norm(U)
-#print(M)
-
-qq = ax.quiver(X, Y, Z, U, V, W, cmap= 'autumn', length=.5, normalize=True) #I think the color based magnitude will go here
-plt.colorbar(qq, cmap='autumn')
+#qq = ax.quiver(X, Y, Z, U, V, W, cmap=plt.cm.jet) #I think the color based magnitude will go here
+ax.quiver(X, Y, Z, U, V, W,colors=c, length=0.5, normalize=True)
 ax.set_xlim([-50, 50])
 ax.set_ylim([-50, 50])
 ax.set_zlim([-50, 50])
